@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Neural Network</title>
+  <link rel="stylesheet" href="./lib/bootstrap-3.3.7/css/bootstrap.css">
+  <link rel="stylesheet" href="./lib/jquery-ui-1.9.2/css/base/jquery-ui-1.9.2.custom.css">
+  <link rel="stylesheet" href="styles/main.css">
+</head>
+<body>
+
+  <div id="app">
+      
+      <section id="preloader" class="hidden" >
+       <div class="loader" id="loader">
+<!--           <img class="loader-img" src="images/loading9.gif"/>-->
+           <p class="preloader-text">Training...</p>
+       </div>
+      </section>
+      
+       <div class="app-content" id="appContent">
+           
+           <div class="container">
+               
+               <ul class="nav nav-tabs">
+                  <li class="active"><a data-toggle="tab" href="#home">Digits recognition</a></li>
+                  <li><a data-toggle="tab" href="#menu1">Time series prediction</a></li>
+                </ul>
+
+                <div class="tab-content">
+                  <div id="home" class="tab-pane fade in active">
+                    
+                      <div class="row">
+                           <h3>Train Network</h3>
+                            <div class="col-md-6">
+                                <form id="trainNetworkForm" class="form">
+                                    <div class="form-group">
+                                        <input name="trainingSetSize" type="text" placeholder="training set size" class="form-control" />
+                                    </div>
+                                    <div class="form-group">
+                                        <input name="errorThresh" type="text" placeholder="error threshold" class="form-control" />
+                                    </div>
+                                    <div class="form-group">
+                                        <input name="iterations" type="text" placeholder="iterations" class="form-control" />
+                                    </div>
+                                    <div class="checkbox">
+                                      <label><input name="log" type="checkbox" checked="true" value="">log</label>
+                                    </div>
+                                    <div class="form-group">
+                                        <input name="logPeriod" type="text" placeholder="log period" class="form-control" />
+                                    </div>
+                                    <div class="form-group">
+                                        <input name="learningRate" type="text" placeholder="learning rate" class="form-control" />
+                                    </div>
+                                    <div class="form-group">
+                                        <input id="startTraining" name="learningRate" type="submit" value="Start" class="btn btn-default" />
+                                    </div>
+                                </form>
+                            </div>
+                           <div class="col-md-6">
+                                <div class="form-group">
+                                    <textarea id="trainingLog" name="trainingLog" type="text" placeholder="training log" class="form-control"></textarea>
+                                </div>
+                            </div>
+                       </div>
+
+                       <div class="row">
+                           <div class="col-md-4">
+
+                            </div>
+                           <div class="col-md-5">
+
+                            </div>
+                           <div class="col-md-3">
+
+                            </div>
+
+                       </div>
+
+                       <canvas class="sketchpad" id="sketchpad" width="280px" height="280px">Sorry, your browser is not supported.</canvas>
+                       <canvas class="sketchpad" id="sketchpad2" width="280px" height="280px">Sorry, your browser is not supported.</canvas>
+                       <canvas id="thumbnail" width="28" height="28">Sorry, your browser is not supported.</canvas>
+
+                       <div id="result" class="result-text"></div>
+
+                       <div id="" class="">
+                           <form id="openImageFileForm">
+                               <div class="form-group">
+                                   <input id="imageFileInput" name="imageFileInput" type="file" class="" />
+                                   <input id="openImageFileFormSubmit" name="openImageFileFormSubmit" type="submit" value="Load" class="btn btn-default" />
+                               </div>
+                           </form>
+                       </div>
+
+                        <div>
+                           <button onclick="sketchpad.undo()" class="btn btn-default">Undo</button>
+                           <button onclick="sketchpad.redo()" class="btn btn-default">Redo</button>
+                           <button type="button" id="sketchClearButton" class="btn btn-danger">Clear</button>
+                           <button type="button" id="sketchRecogniseButton" class="btn btn-success">Recognise</button>
+                       </div>
+                      
+                      
+                  </div>
+                  <div id="menu1" class="tab-pane fade">
+                    <div class="row">
+                        
+                    </div>
+                  </div>
+                </div>
+
+           </div>
+           
+           
+           
+           
+       </div>
+  </div>
+
+  <script src="lib/jquery-3.1.1.min.js"></script>
+  <script src="lib/jquery-ui-1.9.2/js/jquery-ui-1.9.2.custom.js"></script>
+  <script src="lib/bootstrap-3.3.7/js/bootstrap.js"></script>
+  <script src="lib/sketchpad/lib/sketchpad.js"></script>
+<!--  <script src="lib/dat.gui/build/dat.gui.min.js"></script>-->
+   <!--<script src="js/libs.min.js"></script>-->
+  <script src="js/bundle.js"></script>
+<!--  <script src="js/main.js"></script>-->
+    
+    <script>
+  $( function() {
+    $( "#accordion" ).accordion();
+  } );
+  </script>
+  
+</body>
+</html>

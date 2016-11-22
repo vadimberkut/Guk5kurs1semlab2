@@ -1,0 +1,1 @@
+.\nwjs\nwjs-sdk-v0.17.0-win-x64\nw.exe .
