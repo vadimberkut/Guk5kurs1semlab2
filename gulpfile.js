@@ -20,7 +20,9 @@ var autoprefixer = require('gulp-autoprefixer');
 
 var reactify = require('reactify');
 
-var fs = require('fs');
+//var fs = require('fs');
+var fs = require('fs-extra');
+var gm = require('gm');
 var mnist = require('mnist');
 var imagemin = require('gulp-imagemin');
 var imageResize = require('gulp-image-resize');
@@ -138,17 +140,215 @@ gulp.task('img-mnist', function(){
   }
 });
 
+//LETTERS
+gulp.task('img-letters-resize', function(){
+
+  var sourcePath = "./app/images/letters";
+  var destAllPath = "./app/images/letters/all";
+  var destPath = "./app/images/letters_resized";
+
+  var folderStructure = {
+    upper: ['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z'],
+    lower: ['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z']
+  };
+
+  for(var p in folderStructure){
+    if(!folderStructure.hasOwnProperty(p))
+      continue;
+    var folder = p;
+    var folders = folderStructure[p];
+
+    //WRITE FILES IN ONE FOLDER AND RENAME
+    folders.forEach(function(letterFolder, i, arr){
+      var currPath = sourcePath + "/" + folder + "/" + letterFolder;
+
+      fs.readdir(currPath, function(err, filenames) {
+        if (err) {
+          console.log(err);
+          return;
+        }
+        filenames.forEach(function(filename) {
+          var fileExtension = filename.split('.').slice(-1)[0];
+          if(fileExtension != 'png' && fileExtension != 'jpeg' && fileExtension != 'jpg' && fileExtension != 'gif')
+            return;
+          var sourceFileName = currPath + "/" + filename;
+          var destFileName = destAllPath + "/" + letterFolder + "_" + folder + "_" + filename;
+          console.log("Copy file From ",sourceFileName," To ",destFileName);
+          //fs.createReadStream(sourceFileName).pipe(fs.createWriteStream(destFileName));
+          fs.copySync(sourceFileName,destFileName);
+        });
+      });
+    });
+  }
+});
+
+//USE DASTSTONE INSTEAD
+gulp.task('img-letters-convert-to-png', function(){
+
+  //var sourcePath = "./app/images/letters/all/A_lower_0.gif";
+  //var tempPath = "./app/images/letters/temp/A_lower_0.png";
+  //var destPath = "./app/images/letters_converted";
+  //
+  //var writeStream = fs.createWriteStream(tempPath);
+  //gm(sourcePath).setFormat("png").write(writeStream, function(error){
+  //  console.log("Finished saving", error);
+  //});
+});
+gulp.task('img-letters-invert-colors', function(){
+
+  var sourcePath = "./app/images/letters/png";
+  var destPath = "./app/images/letters/inverted";
+
+  fs.readdir(sourcePath, function(err, filenames) {
+    if (err) {
+      console.log(err);
+      return;
+    }
+    filenames.forEach(function(filename) {
+      var fileExtension = filename.split('.').slice(-1)[0];
+      if(fileExtension != 'png' && fileExtension != 'jpeg' && fileExtension != 'jpg' && fileExtension != 'gif')
+        return;
+      var sourceFileName = sourcePath + "/" + filename;
+      var destFileName = destPath + "/" + filename;
+      console.log("Process file From ",sourceFileName," To ",destFileName);
+      Invert(sourceFileName, destFileName);
+    });
+  });
+
+  function Invert(source, dest){
+    fs.createReadStream(source)
+        .pipe(new PNG({
+          filterType: 4
+        }))
+        .on('parsed', function() {
+
+          for (var y = 0; y < this.height; y++) {
+            for (var x = 0; x < this.width; x++) {
+              var idx = (this.width * y + x) << 2;
+
+              // invert color
+              this.data[idx] = 255 - this.data[idx];
+              this.data[idx+1] = 255 - this.data[idx+1];
+              this.data[idx+2] = 255 - this.data[idx+2];
+
+              // and reduce opacity
+              //this.data[idx+3] = this.data[idx+3] >> 1;
+
+              //binarise
+              var thresh = 100;
+              var mean = (this.data[idx] + this.data[idx+1] + this.data[idx+2])/3;
+              var value = 0;
+              if(mean > thresh)
+                value = 255;
+
+              this.data[idx] = value;
+              this.data[idx+1] = value;
+              this.data[idx+2] = value;
+            }
+          }
+          this.pack().pipe(fs.createWriteStream(dest));
+        });
+  }
+
+
+});
+
+
 //Prepare images
 gulp.task('img-resize', function(){
-  return  gulp.src('./app/images/mnist/*.+(png|jpg|jpeg)')
-      .pipe(imagemin({optimizationLevel: 5}))
-      //.pipe(gulp.dest('public/images/og'))
+
+  //var source = './app/images/mnist/*.+(png|jpg|jpeg)';
+  //var dest = './app/images/mnist_resized';
+
+  var source = './app/images/letters/inverted/*.+(png|jpg|jpeg)';
+  var dest = './app/images/letters_resized';
+
+  return  gulp.src(source)
       .pipe(imageResize({
-        width: 280,
-        height: 280,
-        //crop: true
+        width: 28,
+        height: 28,
+        upscale : true
       }))
-      .pipe(gulp.dest('./app/images/mnist_resized'))
+      .pipe(gulp.dest(dest))
+});
+
+
+//Imgs to JSON
+gulp.task('prepare-letters-train-data', function(){
+  var sourcePath = "./app/images/letters_resized";
+  var destPath = "./app/neural_network_data/lettersTrainData.json";
+  var destFileName = "lettersTrainData.json";
+
+  fs.readdir(sourcePath, function(err, filenames) {
+    if (err) {
+      console.log(err);
+      return;
+    }
+    var trainSet = [];
+    filenames.forEach(function(filename, i) {
+      var fileExtension = filename.split('.').slice(-1)[0];
+      if(fileExtension != 'png' && fileExtension != 'jpeg' && fileExtension != 'jpg' && fileExtension != 'gif')
+        return;
+      var sourceFileName = sourcePath + "/" + filename;
+
+      var letter = filename.split("_")[0];
+
+      var data = {
+        input: [], //len 28*28
+        output: GetLetterOutput(letter) //len 26
+      };
+      fs.createReadStream(sourceFileName)
+          .pipe(new PNG({
+            filterType: 4
+          }))
+          .on('parsed', function() {
+
+            for (var y = 0; y < this.height; y++) {
+              for (var x = 0; x < this.width; x++) {
+                var idx = (this.width * y + x) << 2;
+
+                //binarise
+                var thresh = 100;
+                var mean = (this.data[idx] + this.data[idx+1] + this.data[idx+2])/3;
+                var value = 0;
+                if(mean > thresh)
+                  value = 1;
+
+                data.input.push(value);
+              }
+            }
+            //this.pack().pipe(fs.createWriteStream(dest));
+            //console.log(letter,data.output);
+            trainSet.push(data);
+            //console.log("Total set ",trainSet.length);
+          });
+
+      if(i===5000){
+        setTimeout(function(){
+          var json = JSON.stringify(trainSet);
+          fs.writeFileSync(destPath,json, 'utf8');
+          console.log("Writing to file... Total set ",trainSet.length);
+        },5000);
+      }
+
+    });
+  });
+
+
+  function GetLetterOutput(letter){
+    var alphabet = "abcdefghijklmnopqrstuvwxyz".split("");
+    letter = letter.toLowerCase();
+    var letterIndex  = alphabet.indexOf(letter);
+    var output = [];
+    alphabet.forEach(function(lett, i){
+      if(i === letterIndex)
+        output[i] = 1;
+      else
+        output[i] = 0;
+    });
+    return output;
+  }
+
 });
 
 // Default Task

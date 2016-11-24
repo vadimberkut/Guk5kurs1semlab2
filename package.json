@@ -21,7 +21,9 @@
   "license": "ISC",
   "dependencies": {
     "brain.js": "^0.7.0",
+    "fs-extra": "^1.0.0",
     "get-pixels": "^3.3.0",
+    "gm": "^1.23.0",
     "mnist": "git+https://github.com/ApelSYN/mnist.git",
     "pngjs": "^3.0.0",
     "synaptic": "^1.0.8"

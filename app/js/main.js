@@ -67,8 +67,9 @@ function start(){
         var path = fileInput.value;
         console.log(path);
 
-        ////resize image
+        clearer();
 
+        ////resize image
 
         //var content = fs.readFileSync(path).toString();
         //console.log(content);
@@ -82,20 +83,37 @@ function start(){
             console.log("pixels", pixels);
             console.log("got pixels", pixels.shape.slice());
 
-            var grayscale = getGrayscaleFromPixels(pixels);
+            var shape = pixels.shape;
+            var data = pixels.data;
+
+            var width = shape[0];
+            var height = shape[1];
+            var channels = shape[2];
+
+            var size = width*height*channels;
+
+            //var grayscale = getGrayscaleFromPixels(pixels);
+            var grayscale = pixels.data;
             console.log("grayscale", grayscale);
 
             //var imgData = context.createImageData(footprint.width*zoom,footprint.height*zoom);
-            var imgData = context.createImageData(96,96);
+            var imgData = context.createImageData(width,height);
             for (var i=0;i<imgData.data.length;i+=4)
             {
-                imgData.data[i+0]=grayscale[i];
-                imgData.data[i+1]=grayscale[i+1];
-                imgData.data[i+2]=grayscale[i+2];
+                imgData.data[i+0]=pixels.data[i];
+                imgData.data[i+1]=pixels.data[i+1];
+                imgData.data[i+2]=pixels.data[i+2];
                 imgData.data[i+3]=255;
             }
-            context.putImageData(imgData, 0, 0);
+            context.putImageData(imgData, 0, 0,0, 0, canvas.width, canvas.height);
+
+            //var img = new Image(28, 28);
+            //img.src = path;
+            //context.drawImage(img, 0, 0, img.width,    img.height,     // source rectangle
+            //    0, 0, canvas.width, canvas.height); // destination rectangle
         })
+
+
     };
 
     //Get grayscale image from pixels
@@ -234,7 +252,8 @@ function start(){
         var log = form.elements["log"].checked;
         var logPeriod = form.elements["logPeriod"].value;
         var learningRate = form.elements["learningRate"].value;
-        
+        var trainLetters = form.elements["trainLetters"].checked;
+
         var options = {
             trainingSetSize,
             errorThresh,
@@ -242,6 +261,7 @@ function start(){
             log,
             logPeriod,
             learningRate,
+            trainLetters,
             callback: function(data){
                 document.getElementById("trainingLog").innerHTML += "iterations: " + data.iterations + " , error: " + data.error + "\n";
             },

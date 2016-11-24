@@ -15,7 +15,7 @@ export default function(input){
     
     function init(){
         //import json from '../neural_network_data/mnistTrain.json';
-        var json = fs.readFileSync('./app/neural_network_data/mnistTrain.json').toString();
+        var json = fs.readFileSync('./app/neural_network_data/networkMemory.json').toString();
         json = JSON.parse(json);
         net.fromJSON(json);
         isInit = true;

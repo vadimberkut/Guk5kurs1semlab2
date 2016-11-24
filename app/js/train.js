@@ -1,5 +1,6 @@
 //const brain = require('brain.js');
 const fs = nw.require('fs');
+const fsExtra = nw.require('fs-extra');
 //const mnist = require('mnist');
 
 import brain from 'brain.js';
@@ -19,8 +20,20 @@ export default function(options = {}){
             var trainingSetSize = options.trainingSetSize || 1000;
 
             const set = mnist.set(trainingSetSize, 0);
-            const trainingSet = set.training;
+            var trainingSet = set.training;
             var log = options.log === undefined || options.log === null ? true : options.log;
+
+            //console.log("trainingSet = ",trainingSet);
+
+            console.log("options = ",options);
+            if(options.trainLetters){
+              var fContent = fsExtra.readFileSync('app/neural_network_data/lettersTrainData.json', 'utf8');
+              //console.log("fContent = ",fContent);
+              var trainingSetLetters = JSON.parse(fContent);
+              trainingSet = trainingSet.concat(trainingSetLetters);
+              //console.log("trainingSetLetters = ",trainingSetLetters);
+            }
+
             net.train(trainingSet,
                 {
                     errorThresh: options.errorThresh || 0.005,  // error threshold to reach
@@ -33,7 +46,7 @@ export default function(options = {}){
                 }
             );
 
-            let wstream = fs.createWriteStream('../neural_network_data/mnistTrain.json');
+            let wstream = fs.createWriteStream('../neural_network_data/networkMemory.json');
             wstream.write(JSON.stringify(net.toJSON(),null,2));
             wstream.end();
 
