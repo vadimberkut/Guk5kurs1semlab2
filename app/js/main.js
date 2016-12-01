@@ -234,7 +234,9 @@ function start(){
         var maxIndex = 0;
         output.reduce(function(p,c,i){if(p<c) {maxIndex=i; return c;} else return p;});
         console.log('Detect1: '+maxIndex);
-        document.getElementById('result').innerText = maxIndex.toString();
+        var alphabet = "0123456789abcdefghijklmnopqrstuvwxyz";
+        var result = alphabet[maxIndex];
+        document.getElementById('result').innerText = result.toString();
         //isRecognized = true;
     }
     

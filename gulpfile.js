@@ -311,8 +311,9 @@ gulp.task('prepare-letters-train-data', function(){
                 var thresh = 100;
                 var mean = (this.data[idx] + this.data[idx+1] + this.data[idx+2])/3;
                 var value = 0;
-                if(mean > thresh)
-                  value = 1;
+                //if(mean > thresh)
+                //  value = 1;
+                value = mean / 255;
 
                 data.input.push(value);
               }
@@ -336,7 +337,8 @@ gulp.task('prepare-letters-train-data', function(){
 
 
   function GetLetterOutput(letter){
-    var alphabet = "abcdefghijklmnopqrstuvwxyz".split("");
+    var alphabet = "0123456789abcdefghijklmnopqrstuvwxyz".split("");
+    //var offset = 10;
     letter = letter.toLowerCase();
     var letterIndex  = alphabet.indexOf(letter);
     var output = [];

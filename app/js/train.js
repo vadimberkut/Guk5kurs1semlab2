@@ -30,7 +30,22 @@ export default function(options = {}){
               var fContent = fsExtra.readFileSync('app/neural_network_data/lettersTrainData.json', 'utf8');
               //console.log("fContent = ",fContent);
               var trainingSetLetters = JSON.parse(fContent);
-              trainingSet = trainingSet.concat(trainingSetLetters);
+
+              //fix numbers output
+              var alphabet = "0123456789abcdefghijklmnopqrstuvwxyz".split("");
+              trainingSet = trainingSet.map(function(item,i){
+                if(item.output.length < alphabet.length){
+                  var missingZerosLength = alphabet.length - item.output.length;
+                  for(var ii = 0; ii < missingZerosLength; ii++){
+                    item.output.push(0);
+                  }
+                  //item.output = item.output.concat();
+                }
+                return item;
+              });
+
+              //trainingSet = trainingSet.concat(trainingSetLetters);
+              //trainingSet = trainingSetLetters;
               //console.log("trainingSetLetters = ",trainingSetLetters);
             }
 
@@ -46,7 +61,8 @@ export default function(options = {}){
                 }
             );
 
-            let wstream = fs.createWriteStream('../neural_network_data/networkMemory.json');
+            //let wstream = fs.createWriteStream('../neural_network_data/networkMemory.json');
+            let wstream = fs.createWriteStream('app/neural_network_data/networkMemory.json');
             wstream.write(JSON.stringify(net.toJSON(),null,2));
             wstream.end();
 
